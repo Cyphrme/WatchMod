@@ -1,0 +1,8 @@
+{
+	"$WATCH":"$WATCH/example.sh",
+	"$WATCH/test":"$WATCH/example.sh",
+}
+
+
+
+
