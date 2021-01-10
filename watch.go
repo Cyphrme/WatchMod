@@ -30,12 +30,12 @@ func main() {
 
 	done := make(chan bool)
 	for dir, cmd := range dircmd {
-		go run(dir, cmd)
+		go Watch(dir, cmd)
 	}
 	<-done
 }
 
-func run(dir, cmd string) {
+func Watch(dir, cmd string) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatal(err)
@@ -75,9 +75,8 @@ func run(dir, cmd string) {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Done Setting up watch for " + dir)
+	fmt.Println("Done setting up watch for " + dir)
 	<-done
-
 }
 
 func parseConfig(i interface{}) {
