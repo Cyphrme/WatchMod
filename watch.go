@@ -26,61 +26,58 @@ func main() {
 	for k, v := range dircmd {
 		expanded[os.ExpandEnv(k)] = os.ExpandEnv(v)
 	}
-
 	dircmd = expanded
-	fmt.Println(dircmd)
-	run(dircmd)
+
+	done := make(chan bool)
+	for dir, cmd := range dircmd {
+		go run(dir, cmd)
+	}
+	<-done
 }
 
-func run(dircmd map[string]string) {
-
-	for dir, cmd := range dircmd {
-		fmt.Println(dir, cmd)
-
-		watcher, err := fsnotify.NewWatcher()
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer watcher.Close()
-
-		done := make(chan bool)
-		go func() {
-			for {
-				select {
-				case event := <-watcher.Events:
-					if event.Op&fsnotify.Write == fsnotify.Write || event.Op&fsnotify.Rename == fsnotify.Rename {
-						log.Printf("running %q\n", cmd)
-						start := time.Now()
-
-						var ob, eb bytes.Buffer
-						c := exec.Command(cmd)
-						c.Stdout = &ob
-						c.Stderr = &eb
-
-						if err := c.Run(); err != nil {
-							fmt.Println("Error: ", err)
-							fmt.Println(ob.String(), eb.String())
-						}
-
-						elapsed := time.Since(start)
-						log.Printf("Done running %q in %s\n", cmd, elapsed)
-					}
-				case err := <-watcher.Errors:
-					log.Fatal(err)
-				}
-			}
-		}()
-
-		err = watcher.Add(dir)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		fmt.Println("Done running")
-
-		<-done
-
+func run(dir, cmd string) {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
 	}
+	defer watcher.Close()
+
+	done := make(chan bool)
+	go func() {
+		for {
+			select {
+			case event := <-watcher.Events:
+				if event.Op&fsnotify.Write == fsnotify.Write || event.Op&fsnotify.Rename == fsnotify.Rename {
+					log.Printf("running %q\n", cmd)
+					start := time.Now()
+
+					var ob, eb bytes.Buffer
+					c := exec.Command(cmd)
+					c.Stdout = &ob
+					c.Stderr = &eb
+
+					if err := c.Run(); err != nil {
+						fmt.Println("Error: ", err)
+						fmt.Println(ob.String(), eb.String())
+					}
+
+					elapsed := time.Since(start)
+					log.Printf("Done running %q in %s\n", cmd, elapsed)
+				}
+			case err := <-watcher.Errors:
+				log.Fatal(err)
+			}
+		}
+	}()
+
+	err = watcher.Add(dir)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Done Setting up watch for " + dir)
+	<-done
+
 }
 
 func parseConfig(i interface{}) {
