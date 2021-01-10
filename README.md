@@ -1,11 +1,13 @@
 # Watch
-For use with Go template's, Sass, TypeScript, and anything else needing to be compiled while you dev.  
+For use with Go template's, Sass, TypeScript, and anything else needing to be
+compiled while you dev.  
 
 
 Notes: 
 - Expands env vars in flags and config file.  
 - Config supports json5 for comments and trailing commas.  
-- Uses [fsnotify](https://github.com/fsnotify/fsnotify) to watch for file changes.  
+- Uses [fsnotify](https://github.com/fsnotify/fsnotify) to watch for file
+  changes.  
 
 
 ## Config file
