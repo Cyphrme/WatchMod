@@ -25,7 +25,20 @@ func main() {
 
 	var expanded = make(map[string]string)
 	for k, v := range dircmd {
-		expanded[os.ExpandEnv(k)] = os.ExpandEnv(v)
+		var err error
+		// For windows slashes
+		k, err = filepath.Abs(os.ExpandEnv(k))
+		if err != nil {
+			panic(err)
+		}
+
+		// For windows slashes
+		v, err = filepath.Abs(os.ExpandEnv(v))
+		if err != nil {
+			panic(err)
+		}
+
+		expanded[k] = v
 	}
 	dircmd = expanded
 
