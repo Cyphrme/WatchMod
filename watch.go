@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"time"
 
 	"github.com/DisposaBoy/JsonConfigReader"
@@ -81,6 +82,13 @@ func Watch(dir, cmd string) {
 
 func parseConfig(i interface{}) {
 	expand := os.ExpandEnv(*cpath)
+
+	// For windows slashes
+	expand, err := filepath.Abs(expand)
+	if err != nil {
+		panic(err)
+	}
+
 	file, err := os.Open(expand)
 	if err != nil {
 		panic(err)
