@@ -13,7 +13,7 @@ Notes:
 ## Config file
 Json5 in k/v
 
-```json
+```json5
 {
 	dir:command,
 	dir:command,
@@ -23,17 +23,14 @@ Json5 in k/v
 
 
 ## How to
-
 For dev: 
-
-```
+```sh
 go run watch.go -config=$WATCH/watch.json5
 ```
 
 
 For system wide, install it with Go.  
-
-```shell
+```sh
 cd $WATCH
 go install
 watch -config=$WATCH/watch.json5
