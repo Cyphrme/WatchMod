@@ -19,6 +19,10 @@ var dircmd map[string]string
 var cpath *string // Config file path.
 
 func main() {
+	run()
+}
+
+func run() {
 	cpath = flag.String("config", "watch.json5", "path for the watch config.")
 	flag.Parse()
 	parseConfig(&dircmd)
@@ -49,6 +53,7 @@ func main() {
 	<-done
 }
 
+// Watch is for each dir/cmd to watch/run.
 func Watch(dir, cmd string) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -71,7 +76,7 @@ func Watch(dir, cmd string) {
 					c.Stderr = &eb
 
 					if err := c.Run(); err != nil {
-						fmt.Println("Error: ", err)
+						fmt.Println("Watch Error: ", err)
 						fmt.Println(ob.String(), eb.String())
 					}
 
