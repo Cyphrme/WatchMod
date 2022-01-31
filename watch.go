@@ -9,14 +9,20 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"time"
 
 	"github.com/DisposaBoy/JsonConfigReader"
 	"github.com/fsnotify/fsnotify"
 )
 
-var dircmd map[string]string
+var c Config
 var cpath *string // Config file path.
+
+type Config struct {
+	WatchCommand  map[string]string
+	ExcludedFiles []string
+}
 
 func main() {
 	run()
@@ -25,10 +31,13 @@ func main() {
 func run() {
 	cpath = flag.String("config", "watch.json5", "path for the watch config.")
 	flag.Parse()
-	parseConfig(&dircmd)
+	parseConfig(&c)
+
+	sort.Strings(c.ExcludedFiles) // must be sorted for search
+	log.Printf("Exclude Files: %+v\n", c.ExcludedFiles)
 
 	var expanded = make(map[string]string)
-	for k, v := range dircmd {
+	for k, v := range c.WatchCommand {
 		var err error
 		// For windows slashes
 		k, err = filepath.Abs(os.ExpandEnv(k))
@@ -44,10 +53,10 @@ func run() {
 
 		expanded[k] = v
 	}
-	dircmd = expanded
+	c.WatchCommand = expanded
 
 	done := make(chan bool)
-	for dir, cmd := range dircmd {
+	for dir, cmd := range c.WatchCommand {
 		go Watch(dir, cmd)
 	}
 	<-done
@@ -67,6 +76,17 @@ func Watch(dir, cmd string) {
 			select {
 			case event := <-watcher.Events:
 				if event.Op&fsnotify.Write == fsnotify.Write || event.Op&fsnotify.Rename == fsnotify.Rename {
+					// TODO, if a write just happened, sometimes rename is also triggered.
+					// Should only trigger once.
+
+					log.Printf("File changed: %+s, event: %s\n", event.Name, event.Op.String())
+					fileName := filepath.Base(event.Name)
+					excluded := excludeByFileName(fileName)
+					if excluded {
+						log.Printf("Excluded file: %s.  Doing nothing.  \n", fileName)
+						continue
+					}
+
 					log.Printf("running %q\n", cmd)
 					start := time.Now()
 
@@ -120,4 +140,16 @@ func parseConfig(i interface{}) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+// Essentially just a search function.
+func excludeByFileName(fileName string) (excluded bool) {
+	i := sort.SearchStrings(c.ExcludedFiles, fileName) // binary search
+	if len(c.ExcludedFiles) == i {
+		return false
+	}
+	if c.ExcludedFiles[i] != fileName { // Is the element the thing?  If not, it's new.
+		return false
+	}
+	return true
 }
