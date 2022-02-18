@@ -20,9 +20,9 @@ var c Config
 var cpath *string // Config file path.
 
 type Config struct {
-	WatchCommand map[string]string
-	ExcludeFiles []string
-	ExcludeExts  []string
+	WatchCommand   map[string]string
+	ExcludeFiles   []string
+	ExcludeStrings []string
 }
 
 var regexes []*regexp.Regexp
@@ -37,8 +37,8 @@ func run() {
 	parseConfig(&c)
 
 	sort.Strings(c.ExcludeFiles) // must be sorted for searcha
-	setExtRegexes()
-	log.Printf("Exclude Files: %+v\n Exclude Exts: %+v", c.ExcludeFiles, c.ExcludeExts)
+	setStringRegexes()
+	log.Printf("Exclude Files: %+v\n Exclude Strings: %+v", c.ExcludeFiles, c.ExcludeStrings)
 
 	var expanded = make(map[string]string)
 	for k, v := range c.WatchCommand {
@@ -156,15 +156,15 @@ func excludeByFileName(fileName string) (excluded bool) {
 	return true
 }
 
-func setExtRegexes() {
-	for _, ext := range c.ExcludeExts {
+func setStringRegexes() {
+	for _, ext := range c.ExcludeStrings {
 		escaped := regexp.QuoteMeta(ext)
 		reg := regexp.MustCompile(escaped)
 		regexes = append(regexes, reg)
 	}
 }
 
-func matchExcludeExt(filename string) (excluded bool) {
+func matchExcludeString(filename string) (excluded bool) {
 	for _, reg := range regexes {
 		matched := reg.Match([]byte(filename))
 		if matched {
@@ -182,9 +182,9 @@ func Excluded(fileName string) (excluded bool) {
 		return true
 	}
 
-	excluded = matchExcludeExt(fileName)
+	excluded = matchExcludeString(fileName)
 	if excluded {
-		log.Printf("Excluded by ext: %s.  Doing nothing.  \n", fileName)
+		log.Printf("Excluded by string: %s.  Doing nothing.  \n", fileName)
 		return true
 	}
 

@@ -10,7 +10,7 @@
 	"ExcludeFiles":[
 		"app.min.js",
 	],
-	"ExcludeExts":[
+	"ExcludeStrings":[
 		"min.js",
 		"join.js",
 		"map",
