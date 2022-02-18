@@ -38,7 +38,9 @@ func run() {
 
 	sort.Strings(c.ExcludeFiles) // must be sorted for searcha
 	setStringRegexes()
-	log.Printf("Exclude Files: %+v\n Exclude Strings: %+v", c.ExcludeFiles, c.ExcludeStrings)
+	log.Printf("WatchCommand: %+v\n", c.WatchCommand)
+	log.Printf("Exclude Files: %+v\n", c.ExcludeFiles)
+	log.Printf("Exclude Strings: %+v\n", c.ExcludeStrings)
 
 	var expanded = make(map[string]string)
 	for k, v := range c.WatchCommand {
