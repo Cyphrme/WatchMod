@@ -12,6 +12,8 @@ import (
 // Start `go run watch.go`
 func ExampleWatch() {
 	fmt.Println("Running ExampleWatch")
+	run()
+
 	touch()
 	// Output: Running ExampleWatch
 }

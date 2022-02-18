@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"time"
 
@@ -20,9 +20,12 @@ var c Config
 var cpath *string // Config file path.
 
 type Config struct {
-	WatchCommand  map[string]string
-	ExcludedFiles []string
+	WatchCommand map[string]string
+	ExcludeFiles []string
+	ExcludeExts  []string
 }
+
+var regexes []*regexp.Regexp
 
 func main() {
 	run()
@@ -33,8 +36,9 @@ func run() {
 	flag.Parse()
 	parseConfig(&c)
 
-	sort.Strings(c.ExcludedFiles) // must be sorted for search
-	log.Printf("Exclude Files: %+v\n", c.ExcludedFiles)
+	sort.Strings(c.ExcludeFiles) // must be sorted for searcha
+	setExtRegexes()
+	log.Printf("Exclude Files: %+v\n Exclude Exts: %+v", c.ExcludeFiles, c.ExcludeExts)
 
 	var expanded = make(map[string]string)
 	for k, v := range c.WatchCommand {
@@ -81,9 +85,7 @@ func Watch(dir, cmd string) {
 
 					log.Printf("File changed: %+s, event: %s\n", event.Name, event.Op.String())
 					fileName := filepath.Base(event.Name)
-					excluded := excludeByFileName(fileName)
-					if excluded {
-						log.Printf("Excluded file: %s.  Doing nothing.  \n", fileName)
+					if Excluded(fileName) {
 						continue
 					}
 
@@ -96,8 +98,8 @@ func Watch(dir, cmd string) {
 					c.Stderr = &eb
 
 					if err := c.Run(); err != nil {
-						fmt.Println("Watch Error: ", err)
-						fmt.Println(ob.String(), eb.String())
+						log.Println("Watch Error: ", err)
+						log.Println(ob.String(), eb.String())
 					}
 
 					elapsed := time.Since(start)
@@ -114,7 +116,7 @@ func Watch(dir, cmd string) {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Done setting up watch for " + dir)
+	log.Println("Done setting up watch for " + dir)
 	<-done
 }
 
@@ -144,12 +146,47 @@ func parseConfig(i interface{}) {
 
 // Essentially just a search function.
 func excludeByFileName(fileName string) (excluded bool) {
-	i := sort.SearchStrings(c.ExcludedFiles, fileName) // binary search
-	if len(c.ExcludedFiles) == i {
+	i := sort.SearchStrings(c.ExcludeFiles, fileName) // binary search
+	if len(c.ExcludeFiles) == i {
 		return false
 	}
-	if c.ExcludedFiles[i] != fileName { // Is the element the thing?  If not, it's new.
+	if c.ExcludeFiles[i] != fileName { // Is the element the thing?  If not, it's new.
 		return false
 	}
 	return true
+}
+
+func setExtRegexes() {
+	for _, ext := range c.ExcludeExts {
+		escaped := regexp.QuoteMeta(ext)
+		reg := regexp.MustCompile(escaped)
+		regexes = append(regexes, reg)
+	}
+}
+
+func matchExcludeExt(filename string) (excluded bool) {
+	for _, reg := range regexes {
+		matched := reg.Match([]byte(filename))
+		if matched {
+			log.Printf("Input Matched, FileName and ExludeExt: [%s], [%s]\n", filename, reg)
+			return true
+		}
+	}
+	return false
+}
+
+func Excluded(fileName string) (excluded bool) {
+	excluded = excludeByFileName(fileName)
+	if excluded {
+		log.Printf("Excluded by file name: %s.  Doing nothing.  \n", fileName)
+		return true
+	}
+
+	excluded = matchExcludeExt(fileName)
+	if excluded {
+		log.Printf("Excluded by ext: %s.  Doing nothing.  \n", fileName)
+		return true
+	}
+
+	return false
 }
