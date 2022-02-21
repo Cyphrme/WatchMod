@@ -15,4 +15,5 @@
 		"join.js",
 		"map",
 	],
+	"RunCmdOnStart":true
 }

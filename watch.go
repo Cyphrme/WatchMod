@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"flag"
 	"log"
@@ -23,6 +22,7 @@ type Config struct {
 	WatchCommand   map[string]string
 	ExcludeFiles   []string
 	ExcludeStrings []string
+	RunCmdOnStart  bool
 }
 
 var regexes []*regexp.Regexp
@@ -36,11 +36,12 @@ func run() {
 	flag.Parse()
 	parseConfig(&c)
 
-	sort.Strings(c.ExcludeFiles) // must be sorted for searcha
+	sort.Strings(c.ExcludeFiles) // must be sorted for search
 	setStringRegexes()
-	log.Printf("WatchCommand: %+v\n", c.WatchCommand)
-	log.Printf("Exclude Files: %+v\n", c.ExcludeFiles)
-	log.Printf("Exclude Strings: %+v\n", c.ExcludeStrings)
+	log.Printf("Config: %+v\n", c)
+	// log.Printf("WatchCommand: %+v\n", c.WatchCommand)
+	// log.Printf("Exclude Files: %+v\n", c.ExcludeFiles)
+	// log.Printf("Exclude Strings: %+v\n", c.ExcludeStrings)
 
 	var expanded = make(map[string]string)
 	for k, v := range c.WatchCommand {
@@ -58,11 +59,13 @@ func run() {
 		}
 
 		expanded[k] = v
+		if c.RunCmdOnStart {
+			runCmd(v)
+		}
 	}
-	c.WatchCommand = expanded
 
 	done := make(chan bool)
-	for dir, cmd := range c.WatchCommand {
+	for dir, cmd := range expanded {
 		go Watch(dir, cmd)
 	}
 	<-done
@@ -90,22 +93,7 @@ func Watch(dir, cmd string) {
 					if Excluded(fileName) {
 						continue
 					}
-
-					log.Printf("running %q\n", cmd)
-					start := time.Now()
-
-					var ob, eb bytes.Buffer
-					c := exec.Command(cmd)
-					c.Stdout = &ob
-					c.Stderr = &eb
-
-					if err := c.Run(); err != nil {
-						log.Println("Watch Error: ", err)
-						log.Println(ob.String(), eb.String())
-					}
-
-					elapsed := time.Since(start)
-					log.Printf("Done running %q in %s\n", cmd, elapsed)
+					runCmd(cmd)
 				}
 			case err := <-watcher.Errors:
 				log.Fatal(err)
@@ -120,6 +108,18 @@ func Watch(dir, cmd string) {
 
 	log.Println("Done setting up watch for " + dir)
 	<-done
+}
+
+func runCmd(cmd string) {
+	log.Printf("Start run %q\n", cmd)
+	start := time.Now()
+
+	c := exec.Command(cmd)
+	if err := c.Run(); err != nil {
+		log.Printf("Watch Error: %s; On cmd: %s", err, cmd)
+	}
+	elapsed := time.Since(start)
+	log.Printf("End   run %q in %s\n", cmd, elapsed)
 }
 
 func parseConfig(i interface{}) {
