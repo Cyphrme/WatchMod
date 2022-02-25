@@ -115,9 +115,11 @@ func runCmd(cmd string) {
 	start := time.Now()
 
 	c := exec.Command(cmd)
-	if err := c.Run(); err != nil {
-		log.Printf("Watch Error: %s; On cmd: %s", err, cmd)
+	if stdoutStderr, err := c.CombinedOutput(); err != nil {
+
+		log.Printf("Watch Error: %s; On cmd: %s; Error: \n%s\n", err, cmd, stdoutStderr)
 	}
+
 	elapsed := time.Since(start)
 	log.Printf("End   run %q in %s\n", cmd, elapsed)
 }
