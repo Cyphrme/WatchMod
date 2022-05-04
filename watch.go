@@ -116,7 +116,6 @@ func runCmd(cmd string) {
 
 	c := exec.Command(cmd)
 	if stdoutStderr, err := c.CombinedOutput(); err != nil {
-
 		log.Printf("Watch Error: %s; On cmd: %s; Error: \n%s\n", err, cmd, stdoutStderr)
 	}
 
