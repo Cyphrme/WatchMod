@@ -1,30 +1,36 @@
 # Watch
-For use with Go template's, Sass, TypeScript, Javascript/CSS/HTML minification
+For use with Go's templates, Sass, TypeScript, Javascript/CSS/HTML minification
 versioning, and anything else needing triggering while you dev.
 
 We've found it useful for:
 
-- File Versioning 
+- File Versioning (adding a hash to a file)
 - Sass
 - TypeScript
-- Javascript Minification
-- esbuild
-- File versioning (Adding a hash to the end of a file name)
+- `esbuild`
+- Javascript minification
 - CSS minification
 - HTML minification
 
 
 # How to
-For dev: 
+Watch by default looks for a config at `$PWD/watch.json5`.  When installed and a
+config exists, simply run
+
 ```sh
-go run watch.go -config=$WATCH/watch.json5
+watch
 ```
 
-For system wide, install it with Go.  
+For system wide install with Go.  
 ```sh
 cd $WATCH
 go install
 watch -config=$WATCH/watch.json5
+```
+
+`watch` may be run without installing
+```
+go run watch.go -config=$WATCH/watch.json5
 ```
 
 
@@ -47,8 +53,8 @@ watch -config=$WATCH/watch.json5
 }
 ```
 
-# Options
-## WatchCommand
+# Config Options
+## WatchCommand `map[string]string`
 "WatchCommand" is in key:value.  
 
 ```json5
@@ -61,13 +67,15 @@ watch -config=$WATCH/watch.json5
 Where `dir` is the path of the directory or file to watch and `command` is the
 command to run. 
 
-## ExcludeFiles
+## ExcludeFiles `[]string`
 "ExcludeFiles" are the names of any files to exclude from triggering.  
 
-## ExcludeStrings
-"ExcludeStrings" are substrings of any file name to exclude.  For example, if needed to exclude the resulting example.min.js file from triggering, "min.js" will result in it's exclusion.  
+## ExcludeStrings `[]string`
+"ExcludeStrings" are substrings of any file name to exclude.  For example, if
+needed to exclude the resulting example.min.js file from triggering, "min.js"
+will result in it's exclusion.  
 
-## RunCmdOnStart
+## RunCmdOnStart `bool`
 "RunCmdOnStart" will run all commands from "WatchCommand" on start. 
 
 
