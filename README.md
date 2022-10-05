@@ -7,8 +7,9 @@ We've found it useful for:
 - File Versioning (adding a hash to a file)
 - Sass
 - TypeScript
-- `esbuild`
-- Javascript minification
+- [esbuild][esbuild]
+  - Javascript minification
+  - Javascript bundling
 - CSS minification
 - HTML minification
 
@@ -84,6 +85,9 @@ will result in it's exclusion.
 # Notes
 - Expands environmental vars in flags and config file.  
 - Config supports JSON5 for comments and trailing commas.  
-- Uses [fsnotify](https://github.com/fsnotify/fsnotify) to watch for file
-  changes.  
+- Uses [fsnotify][fsnotify] to watch for file changes.  
 - Inspired by [qbit's boring project](https://github.com/qbit/boring).  
+
+
+[esbuild]: https://esbuild.github.io/
+[fsnotify]: https://github.com/fsnotify/fsnotify
