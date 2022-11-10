@@ -9,13 +9,13 @@ import (
 )
 
 // Example Watch
-// Start `go run watch.go`
-func ExampleWatch() {
-	fmt.Println("Running ExampleWatch")
+// Start `go run watch.go -daemon=false`
+func ExampleRun() {
+	parseFlags()
+	fc.daemon = false
 	run()
-
-	touch()
-	// Output: Running ExampleWatch
+	// Output:
+	// Flag `daemon` set to false.  Running commands in config and exiting.
 }
 
 // Create a file, write to it, and delete it.

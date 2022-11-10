@@ -4,7 +4,7 @@ versioning, and anything else needing triggering while you dev.
 
 We've found it useful for:
 
-- File Versioning (adding a hash to a file)
+- File Versioning (adding a hash to a file, especially useful for )
 - Sass
 - TypeScript
 - [esbuild][esbuild]
@@ -80,11 +80,18 @@ will result in it's exclusion.
 "RunCmdOnStart" will run all commands from "WatchCommand" on start. 
 
 
+# Flag options
+- config     (default=config.json5) Location of config file.  
+- daemon     (default=true) If set to false, it will run commands in config and
+              exit, instead of running in daemon mode and listening for changes.   
+
+
 
 
 # Notes
 - Expands environmental vars in flags and config file.  
-- Config supports JSON5 for comments and trailing commas.  
+- Config support JSON5 for comments and trailing commas.  Alternatively, config
+  may be JSON as JSON5 is a superset of JSON.  
 - Uses [fsnotify][fsnotify] to watch for file changes.  
 - Inspired by [qbit's boring project](https://github.com/qbit/boring).  
 

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -15,33 +16,55 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-var c Config
-var cpath *string // Config file path.
+//
 
-type Config struct {
+// flags holds setting settable by flag.
+// Example with flags:
+//
+//	go run watch.go -config=custom.json5 -daemon=false
+type flags struct {
+	configPath string
+	daemon     bool
+}
+
+type Config struct { // Config options setable by config file.
 	WatchCommand   map[string]string
 	ExcludeFiles   []string
 	ExcludeStrings []string
 	RunCmdOnStart  bool
 }
 
+var fc flags
+var c Config
+
 var regexes []*regexp.Regexp
 
 func main() {
+	parseFlags()
 	run()
 }
 
-func run() {
-	cpath = flag.String("config", "watch.json5", "path for the watch config.")
+func parseFlags() {
+	flag.StringVar(&fc.configPath, "config", "watch.json5", "Path for the watch config.")
+	flag.BoolVar(&fc.daemon, "daemon", true, "Run as daemon.  If false, runs command and shuts down.")
 	flag.Parse()
+	// fmt.Printf("Flag config path: %s, %v\n", fc.configPath, fc.daemon)
+}
+
+func run() {
 	parseConfig(&c)
 
 	sort.Strings(c.ExcludeFiles) // must be sorted for search
 	setStringRegexes()
-	log.Printf("Config: %+v\n", c)
+	// log.Printf("Config: %+v\n", c)
 	// log.Printf("WatchCommand: %+v\n", c.WatchCommand)
 	// log.Printf("Exclude Files: %+v\n", c.ExcludeFiles)
 	// log.Printf("Exclude Strings: %+v\n", c.ExcludeStrings)
+
+	if !fc.daemon {
+		fmt.Println("Flag `daemon` set to false.  Running commands in config and exiting.")
+		c.RunCmdOnStart = true
+	}
 
 	var expanded = make(map[string]string)
 	for k, v := range c.WatchCommand {
@@ -62,6 +85,10 @@ func run() {
 		if c.RunCmdOnStart {
 			runCmd(v)
 		}
+	}
+
+	if !fc.daemon {
+		return
 	}
 
 	done := make(chan bool)
@@ -124,7 +151,7 @@ func runCmd(cmd string) {
 }
 
 func parseConfig(i interface{}) {
-	expand := os.ExpandEnv(*cpath)
+	expand := os.ExpandEnv(fc.configPath)
 
 	// For windows slashes
 	expand, err := filepath.Abs(expand)
