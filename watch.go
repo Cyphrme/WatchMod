@@ -1,4 +1,4 @@
-package main
+package watch
 
 import (
 	"encoding/json"
@@ -16,15 +16,13 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-//
-
 // flags holds setting settable by flag.
 // Example with flags:
 //
-//	go run watch.go -config=custom.json5 -daemon=false
+//	go run cmd/main.go -config=watch.json5 -daemon=false
 type flags struct {
-	configPath string
-	daemon     bool
+	ConfigPath string
+	Daemon     bool
 }
 
 type Config struct { // Config options setable by config file.
@@ -34,40 +32,35 @@ type Config struct { // Config options setable by config file.
 	RunCmdOnStart  bool
 }
 
-var fc flags
-var c Config
+var FC flags
+var C Config
 
 var regexes []*regexp.Regexp
 
-func main() {
-	parseFlags()
-	run()
-}
-
-func parseFlags() {
-	flag.StringVar(&fc.configPath, "config", "watch.json5", "Path for the watch config.")
-	flag.BoolVar(&fc.daemon, "daemon", true, "Run as daemon.  If false, runs command and shuts down.")
+func ParseFlags() {
+	flag.StringVar(&FC.ConfigPath, "config", "watch.json5", "Path for the watch config.")
+	flag.BoolVar(&FC.Daemon, "daemon", true, "Run as daemon.  If false, runs command and shuts down.")
 	flag.Parse()
-	// fmt.Printf("Flag config path: %s, %v\n", fc.configPath, fc.daemon)
+	// fmt.Printf("Flag config path: %s, %v\n", FC.configPath, FC.daemon)
 }
 
-func run() {
-	parseConfig(&c)
+func Run() {
+	parseConfig(&C)
 
-	sort.Strings(c.ExcludeFiles) // must be sorted for search
+	sort.Strings(C.ExcludeFiles) // must be sorted for search
 	setStringRegexes()
 	// log.Printf("Config: %+v\n", c)
-	// log.Printf("WatchCommand: %+v\n", c.WatchCommand)
-	// log.Printf("Exclude Files: %+v\n", c.ExcludeFiles)
-	// log.Printf("Exclude Strings: %+v\n", c.ExcludeStrings)
+	// log.Printf("WatchCommand: %+v\n", C.WatchCommand)
+	// log.Printf("Exclude Files: %+v\n", C.ExcludeFiles)
+	// log.Printf("Exclude Strings: %+v\n", C.ExcludeStrings)
 
-	if !fc.daemon {
+	if !FC.Daemon {
 		fmt.Println("Flag `daemon` set to false.  Running commands in config and exiting.")
-		c.RunCmdOnStart = true
+		C.RunCmdOnStart = true
 	}
 
 	var expanded = make(map[string]string)
-	for k, v := range c.WatchCommand {
+	for k, v := range C.WatchCommand {
 		var err error
 		// For windows slashes
 		k, err = filepath.Abs(os.ExpandEnv(k))
@@ -82,12 +75,12 @@ func run() {
 		}
 
 		expanded[k] = v
-		if c.RunCmdOnStart {
+		if C.RunCmdOnStart {
 			runCmd(v)
 		}
 	}
 
-	if !fc.daemon {
+	if !FC.Daemon {
 		return
 	}
 
@@ -141,8 +134,8 @@ func runCmd(cmd string) {
 	log.Printf("Start run %q\n", cmd)
 	start := time.Now()
 
-	c := exec.Command(cmd)
-	if stdoutStderr, err := c.CombinedOutput(); err != nil {
+	commandOut := exec.Command(cmd)
+	if stdoutStderr, err := commandOut.CombinedOutput(); err != nil {
 		log.Printf("Watch Error: %s; On cmd: %s; Error: \n%s\n", err, cmd, stdoutStderr)
 	}
 
@@ -151,7 +144,7 @@ func runCmd(cmd string) {
 }
 
 func parseConfig(i interface{}) {
-	expand := os.ExpandEnv(fc.configPath)
+	expand := os.ExpandEnv(FC.ConfigPath)
 
 	// For windows slashes
 	expand, err := filepath.Abs(expand)
@@ -176,18 +169,18 @@ func parseConfig(i interface{}) {
 
 // Essentially just a search function.
 func excludeByFileName(fileName string) (excluded bool) {
-	i := sort.SearchStrings(c.ExcludeFiles, fileName) // binary search
-	if len(c.ExcludeFiles) == i {
+	i := sort.SearchStrings(C.ExcludeFiles, fileName) // binary search
+	if len(C.ExcludeFiles) == i {
 		return false
 	}
-	if c.ExcludeFiles[i] != fileName { // Is the element the thing?  If not, it's new.
+	if C.ExcludeFiles[i] != fileName { // Is the element the thing?  If not, it's new.
 		return false
 	}
 	return true
 }
 
 func setStringRegexes() {
-	for _, ext := range c.ExcludeStrings {
+	for _, ext := range C.ExcludeStrings {
 		escaped := regexp.QuoteMeta(ext)
 		reg := regexp.MustCompile(escaped)
 		regexes = append(regexes, reg)
@@ -198,7 +191,7 @@ func matchExcludeString(filename string) (excluded bool) {
 	for _, reg := range regexes {
 		matched := reg.Match([]byte(filename))
 		if matched {
-			log.Printf("Input Matched, FileName and ExludeExt: [%s], [%s]\n", filename, reg)
+			log.Printf("Input Matched, FileName and ExcludeExt: [%s], [%s]\n", filename, reg)
 			return true
 		}
 	}

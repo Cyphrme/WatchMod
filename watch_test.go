@@ -1,4 +1,4 @@
-package main
+package watch
 
 import (
 	"fmt"
@@ -9,11 +9,10 @@ import (
 )
 
 // Example Watch
-// Start `go run watch.go -daemon=false`
 func ExampleRun() {
-	parseFlags()
-	fc.daemon = false
-	run()
+	ParseFlags()
+	FC.Daemon = false
+	Run()
 	// Output:
 	// Flag `daemon` set to false.  Running commands in config and exiting.
 }

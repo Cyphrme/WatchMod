@@ -24,14 +24,14 @@ watch
 
 For system wide install with Go.  
 ```sh
-cd $WATCH
+cd $WATCH/cmd
 go install
 watch -config=$WATCH/watch.json5
 ```
 
 `watch` may be run without installing
 ```
-go run watch.go -config=$WATCH/watch.json5
+go run cmd/main.go -config=$WATCH/watch.json5
 ```
 
 
