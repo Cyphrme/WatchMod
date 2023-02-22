@@ -1,4 +1,4 @@
-package main
+package watchmod
 
 import (
 	"encoding/json"
@@ -38,10 +38,6 @@ var C Config
 var FlagsParsed = false
 
 var regexes []*regexp.Regexp
-
-func main() {
-	Run()
-}
 
 func ParseFlags() {
 	flag.StringVar(&FC.ConfigPath, "config", "watchmod.json5", "Path for the watchmod config.")

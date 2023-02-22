@@ -24,7 +24,7 @@ watchmod
 
 For system wide install with Go, cd to the `watchmod` directory and:  
 ```sh
-go install
+cd cmd && go install
 ```
 
 `watchmod` may be run without installing

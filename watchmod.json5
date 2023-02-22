@@ -1,6 +1,6 @@
 // This is a test watch config.  
 // Do testing with: 
-// `go run watch.go`
+// `go run watchmod.go`
 
 {
 	"WatchCommand":{
