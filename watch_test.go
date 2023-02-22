@@ -1,4 +1,4 @@
-package watch
+package main
 
 import (
 	"fmt"
@@ -14,6 +14,7 @@ func ExampleRun() {
 	FC.Daemon = false
 	Run()
 	// Output:
+	// Log file config path: watch.json5
 	// Flag `daemon` set to false.  Running commands in config and exiting.
 }
 

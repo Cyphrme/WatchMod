@@ -1,4 +1,4 @@
-package watch
+package main
 
 import (
 	"encoding/json"
@@ -30,22 +30,37 @@ type Config struct { // Config options setable by config file.
 	ExcludeFiles   []string
 	ExcludeStrings []string
 	RunCmdOnStart  bool
+	PrintStdOut    bool
 }
 
 var FC flags
 var C Config
+var FlagsParsed = false
 
 var regexes []*regexp.Regexp
+
+func main() {
+	Run()
+}
 
 func ParseFlags() {
 	flag.StringVar(&FC.ConfigPath, "config", "watch.json5", "Path for the watch config.")
 	flag.BoolVar(&FC.Daemon, "daemon", true, "Run as daemon.  If false, runs command and shuts down.")
+	flag.BoolVar(&C.PrintStdOut, "PrintStdOut", true, "Print the standard output from commands.  If false, standard out from commands is not printed. ")
 	flag.Parse()
-	// fmt.Printf("Flag config path: %s, %v\n", FC.configPath, FC.daemon)
+	parseConfig(&C)
+	FlagsParsed = true
+
 }
 
 func Run() {
-	parseConfig(&C)
+	if FlagsParsed == false {
+		ParseFlags()
+	}
+
+	// TODO set version on build.
+	// v, _ := gitversion.Version()
+	// log.Printf("Watch Version: %s", v)
 
 	sort.Strings(C.ExcludeFiles) // must be sorted for search
 	setStringRegexes()
@@ -135,8 +150,11 @@ func runCmd(cmd string) {
 	start := time.Now()
 
 	commandOut := exec.Command(cmd)
-	if stdoutStderr, err := commandOut.CombinedOutput(); err != nil {
+	stdoutStderr, err := commandOut.CombinedOutput()
+	if err != nil {
 		log.Printf("Watch Error: %s; On cmd: %s; Error: \n%s\n", err, cmd, stdoutStderr)
+	} else if C.PrintStdOut && len(stdoutStderr) != 0 {
+		log.Printf("%s", stdoutStderr)
 	}
 
 	elapsed := time.Since(start)
@@ -145,6 +163,7 @@ func runCmd(cmd string) {
 
 func parseConfig(i interface{}) {
 	expand := os.ExpandEnv(FC.ConfigPath)
+	fmt.Printf("Log file config path: %s\n", FC.ConfigPath)
 
 	// For windows slashes
 	expand, err := filepath.Abs(expand)
@@ -159,7 +178,6 @@ func parseConfig(i interface{}) {
 
 	// wrap reader before passing it to the json decoder for comment stripping
 	r := JsonConfigReader.New(file)
-
 	decoder := json.NewDecoder(r)
 	err = decoder.Decode(i)
 	if err != nil {
