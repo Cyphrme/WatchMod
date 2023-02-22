@@ -19,7 +19,7 @@ import (
 // flags holds setting settable by flag.
 // Example with flags:
 //
-//	go run cmd/main.go -config=watch.json5 -daemon=false
+//	go run cmd/main.go -config=watchmod.json5 -daemon=false
 type flags struct {
 	ConfigPath string
 	Daemon     bool
@@ -44,7 +44,7 @@ func main() {
 }
 
 func ParseFlags() {
-	flag.StringVar(&FC.ConfigPath, "config", "watch.json5", "Path for the watch config.")
+	flag.StringVar(&FC.ConfigPath, "config", "watchmod.json5", "Path for the watchmod config.")
 	flag.BoolVar(&FC.Daemon, "daemon", true, "Run as daemon.  If false, runs command and shuts down.")
 	flag.BoolVar(&C.PrintStdOut, "PrintStdOut", true, "Print the standard output from commands.  If false, standard out from commands is not printed. ")
 	flag.Parse()
@@ -60,7 +60,7 @@ func Run() {
 
 	// TODO set version on build.
 	// v, _ := gitversion.Version()
-	// log.Printf("Watch Version: %s", v)
+	// log.Printf("watchmod version: %s", v)
 
 	sort.Strings(C.ExcludeFiles) // must be sorted for search
 	setStringRegexes()
@@ -141,7 +141,7 @@ func Watch(dir, cmd string) {
 		log.Fatal(err)
 	}
 
-	log.Println("Done setting up watch for " + dir)
+	log.Println("Done setting up watchmod for " + dir)
 	<-done
 }
 
@@ -152,7 +152,7 @@ func runCmd(cmd string) {
 	commandOut := exec.Command(cmd)
 	stdoutStderr, err := commandOut.CombinedOutput()
 	if err != nil {
-		log.Printf("Watch Error: %s; On cmd: %s; Error: \n%s\n", err, cmd, stdoutStderr)
+		log.Printf("watchmod error: %s; On cmd: %s; Error: \n%s\n", err, cmd, stdoutStderr)
 	} else if C.PrintStdOut && len(stdoutStderr) != 0 {
 		log.Printf("%s", stdoutStderr)
 	}

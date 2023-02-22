@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// Example Watch
+// ExampleRun
 func ExampleRun() {
 	ParseFlags()
 	FC.Daemon = false
@@ -36,7 +36,7 @@ func touch() {
 		}
 	}
 
-	b := []byte("hello watch!")
+	b := []byte("hello watchmod!")
 	err = ioutil.WriteFile(fileName, b, 0644)
 	if err != nil {
 		fmt.Println("Could not write to: " + fileName)

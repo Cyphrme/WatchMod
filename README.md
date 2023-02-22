@@ -1,4 +1,4 @@
-# Watch
+# watchmod
 For use with Go's templates, Sass, TypeScript, Javascript/CSS/HTML minification
 versioning, and anything else needing triggering while you dev.
 
@@ -15,23 +15,21 @@ We've found it useful for:
 
 
 # How to
-Watch by default looks for a config at `$PWD/watch.json5`.  When installed and a
-config exists, simply run
+`watchmod` by default looks for a config at `$PWD/watchmod.json5`.  When
+installed and a config exists, simply run
 
 ```sh
-watch
+watchmod
 ```
 
-For system wide install with Go.  
+For system wide install with Go, cd to the `watchmod` directory and:  
 ```sh
-cd $WATCH/cmd
 go install
-watch -config=$WATCH/watch.json5
 ```
 
-`watch` may be run without installing
+`watchmod` may be run without installing
 ```
-go run cmd/main.go -config=$WATCH/watch.json5
+go run matchmod.go -config=$WATCH/watchmod.json5
 ```
 
 
@@ -65,7 +63,7 @@ go run cmd/main.go -config=$WATCH/watch.json5
 }
 ```
 
-Where `dir` is the path of the directory or file to watch and `command` is the
+Where `dir` is the directory or file to watch and `command` is the
 command to run. 
 
 ## ExcludeFiles `[]string`
@@ -84,8 +82,6 @@ will result in it's exclusion.
 - config     (default=config.json5) Location of config file.  
 - daemon     (default=true) If set to false, it will run commands in config and
               exit, instead of running in daemon mode and listening for changes.   
-
-
 
 
 # Notes

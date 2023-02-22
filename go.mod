@@ -1,4 +1,4 @@
-module github.com/zamicol/watch
+module github.com/zamicol/watchmod
 
 go 1.15
 
