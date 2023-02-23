@@ -22,14 +22,14 @@ installed and a config exists, simply run
 watchmod
 ```
 
-For system wide install with Go, cd to the `watchmod` directory and:  
+For system wide install with Go, cd to the `watchmod/cmd` directory and:  
 ```sh
 cd cmd && go install
 ```
 
 `watchmod` may be run without installing
 ```
-go run matchmod.go -config=$WATCH/watchmod.json5
+go run cmd/main.go -config=$WATCH/watchmod.json5
 ```
 
 
