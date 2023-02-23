@@ -22,10 +22,14 @@ installed and a config exists, simply run
 watchmod
 ```
 
+
 For system wide install with Go, cd to the `watchmod/cmd` directory and:  
 ```sh
-cd cmd && go install
+(cd cmd && go build watchmod.go && cp watchmod $HOME/dev/go/bin)
 ```
+`go install` doesn't appear to report errors (!) so we recommend against using
+it.  Also, `$GOBIN` should be in path (in something like .profile,
+`PATH=$GOBIN:$PATH`
 
 `watchmod` may be run without installing
 ```

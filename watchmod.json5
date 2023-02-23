@@ -4,8 +4,8 @@
 
 {
 	"WatchCommand":{
-	"$WATCH":"$WATCH/example.sh",
-	"$WATCH/test":"$WATCH/example.sh",
+	"$WATCHMOD":"$WATCHMOD/example.sh",
+	"$WATCHMOD/test":"$WATCHMOD/example.sh",
 	},
 	"ExcludeFiles":[
 		"app.min.js",
