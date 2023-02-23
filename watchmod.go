@@ -159,7 +159,7 @@ func runCmd(cmd string) {
 
 func parseConfig(i interface{}) {
 	expand := os.ExpandEnv(FC.ConfigPath)
-	fmt.Printf("Log file config path: %s\n", FC.ConfigPath)
+	fmt.Printf("Config path: %s\n", FC.ConfigPath)
 
 	// For windows slashes
 	expand, err := filepath.Abs(expand)

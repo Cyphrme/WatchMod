@@ -23,13 +23,14 @@ watchmod
 ```
 
 
-For system wide install with Go, cd to the `watchmod/cmd` directory and:  
+For system wide install with Go:
+
 ```sh
-(cd cmd && go build watchmod.go && cp watchmod $HOME/dev/go/bin)
+go install cmd/watchmod.go
 ```
-`go install` doesn't appear to report errors (!) so we recommend against using
-it.  Also, `$GOBIN` should be in path (in something like .profile,
-`PATH=$GOBIN:$PATH`
+
+Also, `$GOBIN` should be in path (in something like .profile,
+`PATH=$GOBIN:$PATH`)
 
 `watchmod` may be run without installing
 ```

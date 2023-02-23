@@ -14,7 +14,7 @@ func ExampleRun() {
 	FC.Daemon = false
 	Run()
 	// Output:
-	// Log file config path: watch.json5
+	// Config path: watchmod.json5
 	// Flag `daemon` set to false.  Running commands in config and exiting.
 }
 
