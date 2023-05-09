@@ -4,7 +4,7 @@ versioning, and anything else needing triggering while you dev.
 
 We've found it useful for:
 
-- File Versioning (adding a hash to a file, especially useful for )
+- File Versioning (See [FileVer][filever])
 - Sass
 - TypeScript
 - [esbuild][esbuild]
@@ -97,5 +97,6 @@ will result in it's exclusion.
 - Inspired by [qbit's boring project](https://github.com/qbit/boring).  
 
 
-[esbuild]: https://esbuild.github.io/
-[fsnotify]: https://github.com/fsnotify/fsnotify
+[filever]:   https://github.com/Cyphrme/FileVer
+[esbuild]:   https://esbuild.github.io/
+[fsnotify]:  https://github.com/fsnotify/fsnotify
