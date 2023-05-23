@@ -22,7 +22,6 @@ installed and a config exists, simply run
 watchmod
 ```
 
-
 For system wide install with Go:
 
 ```sh
@@ -87,6 +86,30 @@ will result in it's exclusion.
 - config     (default=config.json5) Location of config file.  
 - daemon     (default=true) If set to false, it will run commands in config and
               exit, instead of running in daemon mode and listening for changes.   
+
+
+# JSON Errors
+If command output is JSON, watchmod print the error if the JSON has the field
+"success" with the bool false and/or the field "error" with a not nil value. (If
+command output is not JSON it is not parsed.)
+
+Command output that includes JSON of
+
+```JSON
+{"success":false} 
+
+```
+Or
+```JSON
+{"error":"call had an error"}
+```
+
+Results in a log like the following:
+
+```sh
+2023/05/23 13:58:52 ⚠️ watchmod command error: test/echo_error_test.sh
+{"success":false,"foo":"bar",...}
+```
 
 
 # Notes

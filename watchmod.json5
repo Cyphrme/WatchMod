@@ -1,11 +1,12 @@
 // This is a test watch config.  
 // Do testing with: 
-// `go run watchmod.go`
+// `go test`
 
 {
 	"WatchCommand":{
-	"$WATCHMOD":"$WATCHMOD/example.sh",
-	"$WATCHMOD/test":"$WATCHMOD/example.sh",
+	"$WATCHMOD":"$WATCHMOD/test/example.sh",
+	"$WATCHMOD/test":"$WATCHMOD/test/example.sh",
+	"$WATCHMOD":"$WATCHMOD/test/echo_error_test.sh",
 	},
 	"ExcludeFiles":[
 		"app.min.js",

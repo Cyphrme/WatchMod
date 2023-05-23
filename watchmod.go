@@ -25,7 +25,7 @@ type flags struct {
 	Daemon     bool
 }
 
-type Config struct { // Config options setable by config file.
+type Config struct { // Config options settable by config file.
 	WatchCommand   map[string]string
 	ExcludeFiles   []string
 	ExcludeStrings []string
@@ -141,6 +141,16 @@ func Watch(dir, cmd string) {
 	<-done
 }
 
+// jError is for parsing errors from JSON.  If JSON, check for error by looking
+// for `"success":false` and field "error" not nil.  i.e.
+//
+// {"success":false,"msg":"call had an error","path":"/admin/job/minPage"} Or
+// {"error":"call had an error","path":"/admin/job/minPage"}
+type jError struct {
+	Success bool            `json:"success,omitempty" `
+	Err     json.RawMessage `json:"error,omitempty" `
+}
+
 func runCmd(cmd string) {
 	log.Printf("Start run %q\n", cmd)
 	start := time.Now()
@@ -148,9 +158,19 @@ func runCmd(cmd string) {
 	commandOut := exec.Command(cmd)
 	stdoutStderr, err := commandOut.CombinedOutput()
 	if err != nil {
-		log.Printf("watchmod error: %s; On cmd: %s; Error: \n%s\n", err, cmd, stdoutStderr)
+		// See "fatih/color" for color codes: https://github.com/fatih/color/blob/f4c431696a22e834b83444f720bd144b2dbbccff/color.go#L64
+		log.Printf("\x1b[31m⚠️ watchmod error:\x1b[0m  %s; On cmd: %s; Error: \n%s\n", err, cmd, stdoutStderr)
 	} else if C.PrintStdOut && len(stdoutStderr) != 0 {
 		log.Printf("%s", stdoutStderr)
+	}
+
+	// Check for JSON errors.
+	je := new(jError)
+	err = json.Unmarshal(stdoutStderr, je)
+	if err == nil { // Ignore errors assuming command output is not JSON.
+		if je.Success == false || len(je.Err) != 0 {
+			log.Printf("\x1b[31m⚠️ watchmod command error:\x1b[0m %s\n%s\n\n", cmd, stdoutStderr)
+		}
 	}
 
 	elapsed := time.Since(start)
