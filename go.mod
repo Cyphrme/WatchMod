@@ -1,4 +1,4 @@
-module github.com/Cyphrme/watchmod
+module github.com/cyphrme/watchmod
 
 go 1.19
 
